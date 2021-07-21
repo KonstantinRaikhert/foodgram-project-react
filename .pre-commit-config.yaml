@@ -1,0 +1,45 @@
+repos:
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      -  id: trailing-whitespace
+      -  id: end-of-file-fixer
+      -  id: check-yaml
+      -  id: check-added-large-files
+      -  id: check-merge-conflict
+
+-   repo: https://github.com/PyCQA/isort
+    rev: 5.9.2
+    hooks:
+      - id: isort
+        exclude: migrations
+        args: [--profile, black, --line-length=79]
+
+-   repo: https://github.com/PyCQA/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        exclude: migrations
+
+-   repo: https://github.com/psf/black
+    rev: 21.7b0
+    hooks:
+      - id: black
+        exclude: migrations
+        args: [--line-length=79]
+
+-   repo: local
+    hooks:
+      - id: export-dev-requirements
+        name: Export Develop requirements
+        language: system
+        pass_filenames: false
+        entry: poetry export --without-hashes --dev --output requirements/develop.txt
+        files: ^(pyproject.toml|poetry.lock)$
+      - id: export-prod-requirements
+        name: Export Production requirements
+        language: system
+        pass_filenames: false
+        entry: poetry export --without-hashes --output requirements/production.txt
+        files: ^(pyproject.toml|poetry.lock)$
