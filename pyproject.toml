@@ -7,6 +7,7 @@ authors = ["Konstantin Raikhert <konstantinraihert@yandex.ru>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = "^3.2.5"
+djangorestframework = "^3.12.4"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.9.4"

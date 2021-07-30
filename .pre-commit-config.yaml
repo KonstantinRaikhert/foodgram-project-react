@@ -33,7 +33,7 @@ repos:
     hooks:
       - id: export-dev-requirements
         name: Export Develop requirements
-        language: system
+        language: python
         pass_filenames: false
         entry: poetry export --without-hashes --dev --output requirements/develop.txt
         files: ^(pyproject.toml|poetry.lock)$
