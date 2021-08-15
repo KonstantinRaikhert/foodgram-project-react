@@ -35,11 +35,11 @@ repos:
         name: Export Develop requirements
         language: python
         pass_filenames: false
-        entry: poetry export --without-hashes --dev --output requirements/develop.txt
+        entry: poetry export --without-hashes --dev --output backend/requirements/develop.txt
         files: ^(pyproject.toml|poetry.lock)$
       - id: export-prod-requirements
         name: Export Production requirements
         language: system
         pass_filenames: false
-        entry: poetry export --without-hashes --output requirements/production.txt
+        entry: poetry export --without-hashes --output backend/requirements/production.txt
         files: ^(pyproject.toml|poetry.lock)$
