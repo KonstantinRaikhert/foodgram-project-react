@@ -4,6 +4,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import models
+from django.db.models import UniqueConstraint
 from django.utils import timezone
 
 
@@ -29,20 +30,38 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(max_length=255, unique=True)
-    username = models.CharField(max_length=255, unique=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(default=timezone.now)
-    last_login = models.DateTimeField(null=True)
+    email = models.EmailField(
+        max_length=255, unique=True, verbose_name="Электронная почта"
+    )
+    username = models.CharField(
+        max_length=255, unique=True, verbose_name="Имя пользователя"
+    )
+    first_name = models.CharField(max_length=255, verbose_name="Имя")
+    last_name = models.CharField(max_length=255, verbose_name="Фамилия")
+    is_active = models.BooleanField(
+        default=True, verbose_name="Статус активности"
+    )
+    is_staff = models.BooleanField(
+        default=False, verbose_name="Статус администратора"
+    )
+    is_superuser = models.BooleanField(
+        default=False, verbose_name="Статус суперпользователя"
+    )
+    date_joined = models.DateTimeField(
+        default=timezone.now, verbose_name="Дата регистрации"
+    )
+    last_login = models.DateTimeField(
+        null=True, verbose_name="Последнее посещение"
+    )
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
 
     def get_full_name(self):
         return f"{self.first_name} - {self.last_name}"
@@ -58,3 +77,31 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class Subscribe(models.Model):
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="author",
+        verbose_name="Автор",
+    )
+    subscriber = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="subscriber",
+        verbose_name="Подписчик",
+    )
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        ordering = ["id"]
+        constraints = [
+            UniqueConstraint(
+                fields=["author", "subscriber"], name="unique_subscription"
+            )
+        ]
+
+    def __str__(self):
+        return self.author.username
