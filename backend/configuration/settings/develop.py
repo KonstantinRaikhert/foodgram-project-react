@@ -3,24 +3,31 @@ import os
 from .base import *
 from .base import env
 
-env_file = os.path.join(BASE_DIR, ".env")
-environ.Env.read_env(env_file)
-
-
-# GENERAL
+# General
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = True
 
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-SECRET_KEY = env(
-    "DJANGO_SECRET_KEY",
-    default="django-insecure-=3jsy^o^qfdbx(xzje+^y(9-o@od*6c+8vb104=0o8l4bvf5o%",
-)
-# https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
+# https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+
+# Databases
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#databases
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_DB"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
+    }
+}
 
 # django-debug-toolbar
 # ------------------------------------------------------------------------------
@@ -45,21 +52,7 @@ INSTALLED_APPS += ["django_extensions"]  # noqa: F405
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-EMAIL_BACKEND = env(
-    "DJANGO_EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend",
-)
-
-# Your stuff...
-# ------------------------------------------------------------------------------
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": env("POSTGRES_DB", default="db"),
-        "USER": env("POSTGRES_USER", default="foodgram"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default="foodgram"),
-        "HOST": env("POSTGRES_HOST", default="postgres"),
-        "PORT": env("POSTGRES_PORT", default=5432),
-    }
-}
+# EMAIL_BACKEND = env(
+#     "DJANGO_EMAIL_BACKEND",
+#     default="django.core.mail.backends.console.EmailBackend",
+# )

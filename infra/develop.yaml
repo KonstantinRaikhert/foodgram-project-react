@@ -6,12 +6,9 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: db
-      POSTGRES_USER: foodgram
-      POSTGRES_PASSWORD: foodgram
+    env_file:
+      - ./.envs/.postgres
+
   frontend:
     build:
       context: ../frontend
@@ -32,6 +29,9 @@ services:
       - media_value:/code/backend_media/
     depends_on:
       - postgres
+    env_file:
+      - ./.envs/.postgres
+      - ./.envs/.django
   nginx:
     image: nginx:1.19.3
     ports:

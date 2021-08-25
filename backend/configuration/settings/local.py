@@ -3,10 +3,6 @@ import os
 from .base import *  # noqa
 from .base import env
 
-env_file = os.path.join(BASE_DIR, ".env")
-environ.Env.read_env(env_file)
-
-
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
@@ -56,10 +52,10 @@ EMAIL_BACKEND = env(
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": env("POSTGRES_DB", default="db"),
+        "NAME": env("POSTGRES_DB", default="foodgram"),
         "USER": env("POSTGRES_USER", default="foodgram"),
         "PASSWORD": env("POSTGRES_PASSWORD", default="foodgram"),
-        "HOST": env("POSTGRES_HOST", default="localhost"),
-        "PORT": env("POSTGRES_PORT", default=5432),
+        "HOST": env("POSTGRES_HOST", default="127.0.0.1"),
+        "PORT": env("POSTGRES_PORT", default="5432"),
     }
 }

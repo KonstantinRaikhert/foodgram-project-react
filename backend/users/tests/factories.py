@@ -37,6 +37,15 @@ class UserFactory(factory.django.DjangoModelFactory):
 class SubscribeFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Subscribe
+        django_get_or_create = ["author", "subscriber"]
 
-    author = factory.Iterator(CustomUser.objects.all())
-    subscriber = factory.SubFactory(UserFactory)
+    @factory.lazy_attribute
+    def author(self):
+        return CustomUser.objects.order_by("?").first()
+
+    @factory.lazy_attribute
+    def subscriber(self):
+        subscriber = (
+            CustomUser.objects.exclude(id=self.author.id).order_by("?").first()
+        )
+        return subscriber

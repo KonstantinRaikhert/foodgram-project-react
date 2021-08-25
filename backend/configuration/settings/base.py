@@ -26,6 +26,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Application definition
 
+# General
+# ----------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#debug
+DEBUG = env.bool("DJANGO_DEBUG", False)
+
+SITE_ID = 1
+
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -82,23 +89,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "configuration.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": env("POSTGRES_DB", default="db"),
-        "USER": env("POSTGRES_USER", default="foodgram"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default="foodgram"),
-        # "HOST": env("POSTGRES_HOST", default="postgres"),
-        "HOST": env("POSTGRES_HOST", default="localhost"),
-        "PORT": env("POSTGRES_PORT", default=5432),
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -121,7 +111,7 @@ AUTH_USER_MODEL = "users.CustomUser"
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+        "rest_framework.permissions.IsAdminUser",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
@@ -132,6 +122,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
+    "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S",
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
     # Django REST Framework JSON CamelCase
     # https://github.com/vbabiy/djangorestframework-camel-case
     # ------------------------------------------------------------------------
@@ -178,26 +170,28 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ("https://localhost:3000",)
+CORS_URL_REGEX = r"^/api/.*$"
 
 # Djoser config
 DJOSER = {
     "LOGIN_FIELD": "email",
     "PASSWORD_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
-    "ACTIVATION_URL": "#/activate/{uid}/{token}",
-    "SEND_ACTIVATION_EMAIL": True,
     "SERIALIZERS": {
         "user_create": "users.serializers.UserCreateSerializer",
-        "user": "djoser.serializers.UserSerializer",
+        "user": "users.serializers.UserSerializer",
         "current_user": "djoser.serializers.UserSerializer",
         "user_delete": "djoser.serializers.UserSerializer",
     },
+    "PERMISSIONS": {
+        "user_list": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
+        "user": ["rest_framework.permissions.AllowAny"],
+    },
+    "HIDE_USERS": False,
 }
 
 # Email config
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "localhost"
-EMAIL_PORT = "1025"
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""
-EMAIL_USE_TLS = False
+EMAIL_BACKEND = env(
+    "DJANGO_EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_TIMEOUT = 5

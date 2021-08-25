@@ -6,12 +6,8 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: db
-      POSTGRES_USER: foodgram
-      POSTGRES_PASSWORD: foodgram
+    env_file:
+      - ./.envs/.postgres-local
 
 volumes:
   postgres_data:
