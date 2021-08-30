@@ -181,6 +181,7 @@ DJOSER = {
         "user": "users.serializers.UserSerializer",
         "current_user": "djoser.serializers.UserSerializer",
         "user_delete": "djoser.serializers.UserSerializer",
+        "set_password": "users.serializers.UserChangePasswordSerializer",
     },
     "PERMISSIONS": {
         "user_list": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],

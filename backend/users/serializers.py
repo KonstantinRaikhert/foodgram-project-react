@@ -1,4 +1,5 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, password_validation
+from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from users.models import Subscribe
@@ -42,3 +43,33 @@ class UserSerializer(serializers.ModelSerializer):
             return subscription.exists()
         except (TypeError, AttributeError):
             return False
+
+
+class UserChangePasswordSerializer(serializers.ModelSerializer):
+    current_password = serializers.CharField(
+        max_length=128, write_only=True, required=True
+    )
+    new_password = serializers.CharField(
+        max_length=128, write_only=True, required=True
+    )
+
+    def validate_current_password(self, value):
+        is_password_valid = self.context["request"].user.check_password(value)
+        if not is_password_valid:
+            raise serializers.ValidationError(
+                _("Текущий пароль неверный. Попробуйте снова")
+            )
+        return value
+
+    def validate(self, data):
+        password_validation.validate_password(
+            data["new_password"], self.context["request"].user
+        )
+        return data
+
+    def save(self, **kwargs):
+        password = self.validated_data["new_password"]
+        user = self.context["request"].user
+        user.set_password(password)
+        user.save()
+        return user

@@ -1,7 +1,12 @@
 import os
 
+import environ
+
 from .base import *  # noqa
-from .base import env
+
+# from .base import env
+
+env = environ.Env()
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -52,9 +57,10 @@ EMAIL_BACKEND = env(
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": env("POSTGRES_DB", default="foodgram"),
+        "NAME": env("POSTGRES_DB", default="db"),
         "USER": env("POSTGRES_USER", default="foodgram"),
         "PASSWORD": env("POSTGRES_PASSWORD", default="foodgram"),
+        # "HOST": env("POSTGRES_HOST", default="postgres"),
         "HOST": env("POSTGRES_HOST", default="127.0.0.1"),
         "PORT": env("POSTGRES_PORT", default="5432"),
     }
