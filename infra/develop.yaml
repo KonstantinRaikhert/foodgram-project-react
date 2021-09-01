@@ -27,8 +27,22 @@ services:
     volumes:
       - static_value:/code/backend_static/
       - media_value:/code/backend_media/
+    env_file:
+      - ./.envs/.postgres
+      - ./.envs/.django
+  migrations:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    volumes:
+      - static_value:/code/backend_static/
+      - media_value:/code/backend_media/
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py createadmin &&
+             python manage.py filldb"
     depends_on:
-      - postgres
+      - backend
     env_file:
       - ./.envs/.postgres
       - ./.envs/.django
