@@ -1,19 +1,15 @@
 version: '3.8'
 
+volumes:
+  postgres_data_local:
+
 services:
-  postgres:
+  postgres-local:
     image: postgres:13.3
     restart: always
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    # env_file:
-    #   - ./.envs/.postgres-local
-    environment:
-      POSTGRES_DB: db
-      POSTGRES_HOST: 127.0.0.1
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: foodgram
-      POSTGRES_PASSWORD: foodgram
-
-volumes:
-  postgres_data:
+      - postgres_data_local:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.envs/.postgres_local
