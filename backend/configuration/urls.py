@@ -24,6 +24,7 @@ extra_patterns = [
     path(
         "",
         include("users.urls"),
+        include("recipes.urls"),
     )
 ]
 
