@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy
-from management.utils import slugify
+from utilites.utils import slugify
 
 
 class Tag(models.Model):
@@ -9,7 +9,7 @@ class Tag(models.Model):
         GREEN = "#49B64E", gettext_lazy("Зелёный")
         PURPLE = "#8775D2", gettext_lazy("Фиолетовый")
 
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True, blank=False)
     slug = models.SlugField(max_length=50, unique=True)
     color = models.CharField(
         verbose_name="Цвет тега", max_length=8, choices=Color.choices
@@ -23,3 +23,6 @@ class Tag(models.Model):
     class Meta:
         verbose_name = "Тэг"
         verbose_name_plural = "Теги"
+
+    def __str__(self):
+        return self.name

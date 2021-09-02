@@ -21,11 +21,8 @@ from django.urls import include, path
 DEBUG = settings.DEBUG
 
 extra_patterns = [
-    path(
-        "",
-        include("users.urls"),
-        include("recipes.urls"),
-    )
+    path("", include("users.urls")),
+    path("", include("recipes.urls")),
 ]
 
 urlpatterns = [

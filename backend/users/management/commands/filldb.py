@@ -1,5 +1,7 @@
 import factory
 from django.core.management.base import BaseCommand
+from recipes.models import Tag
+from recipes.tests.factories import TagFactory
 from users.tests.factories import SubscribeFactory, UserFactory
 
 
@@ -27,6 +29,8 @@ OPTIONS_AND_FUNCTIONS = {
     "users_no_active": all_factories.create_users_no_active,
     "subscriber": all_factories.create_subscribers,
 }
+
+MEALTIME_TAGS = ["Завтрак", "Обед", "Ужин"]
 
 
 class MyException(Exception):
@@ -89,6 +93,11 @@ class Command(BaseCommand):
                     for _ in range(5):
                         UserFactory.create(is_active=False)
                     SubscribeFactory.create_batch(30)
+                    for tag in range(len(MEALTIME_TAGS)):
+                        TagFactory.create(
+                            name=MEALTIME_TAGS[tag],
+                            color=Tag.Color.choices[tag][0],
+                        )
 
                 self.stdout.write(
                     self.style.SUCCESS("The database is filled with test data")

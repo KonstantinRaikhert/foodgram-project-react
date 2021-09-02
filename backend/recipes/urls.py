@@ -1,9 +1,11 @@
 from django.urls import path
-from recipes.views import TagList
+from django.urls.conf import include
+from recipes.views import TagViewSet
+from rest_framework.routers import DefaultRouter
 
-# from django.urls.conf import include
-
+router = DefaultRouter()
+router.register("tags", TagViewSet, basename="tags")
 
 urlpatterns = [
-    path("tags/", TagList.as_view(), name="tags"),
+    path("", include(router.urls)),
 ]
