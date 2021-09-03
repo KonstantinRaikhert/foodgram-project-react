@@ -1,5 +1,7 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy
+from users.models import CustomUser
 from utilites.utils import slugify
 
 
@@ -35,7 +37,6 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(
         verbose_name="Единицы измерения",
         max_length=10,
-        # unique=True,
         blank=False,
     )
 
@@ -46,3 +47,59 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Recipe(models.Model):
+    author = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, verbose_name="Автор"
+    )
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through="IngredientItem",
+        through_fields=("recipe", "ingredient"),
+        verbose_name="Ингредиенты",
+    )
+    tags = models.ManyToManyField(Tag, verbose_name="Теги")
+    name = models.CharField(max_length=200, verbose_name="Название")
+    image = models.ImageField(upload_to="recipes/", verbose_name="Изображение")
+    text = models.TextField(verbose_name="Описание")
+    cooking_time = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name="Время приготовления",
+    )
+
+    class Meta:
+        verbose_name = "Рецепт"
+        verbose_name_plural = "Рецепты"
+        ordering = ["-id"]
+
+    def __str__(self):
+        return self.name
+
+
+class IngredientItem(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name="recipe_ingredients",
+        verbose_name="Рецепт",
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name="ingredients",
+        verbose_name="Ингредиент",
+    )
+    amount = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1)], verbose_name="Количество"
+    )
+
+    class Meta:
+        verbose_name = "Ингредиент в рецепте"
+        verbose_name_plural = "Ингредиенты в рецепте"
+        ordering = ["id"]
+        unique_together = ("recipe", "ingredient")
+
+    def __str__(self):
+        return self.ingredient.name

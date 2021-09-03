@@ -104,4 +104,7 @@ class Subscribe(models.Model):
         ]
 
     def __str__(self):
-        return self.author.username
+        return (
+            f"Подписка ' {self.author.username} ' на пользователя "
+            f"' {self.subscriber.username} '"
+        )

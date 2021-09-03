@@ -10,7 +10,10 @@ class TagFactory(factory.django.DjangoModelFactory):
         model = Tag
         django_get_or_create = ["name"]
 
-    name = fake.word()
+    name = factory.Faker(
+        "word",
+        ext_word_list=["Завтрак", "Обед", "Ужин", "Полдник", "Ланч", "Десерт"],
+    )
 
 
 class IngredientFactory(factory.django.DjangoModelFactory):
@@ -19,4 +22,6 @@ class IngredientFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ["measurement_unit"]
 
     name = fake.word()
-    measurement_unit = fake.word()
+    measurement_unit = factory.Faker(
+        "word", ext_word_list=["кг", "г", "мл", "л"]
+    )
