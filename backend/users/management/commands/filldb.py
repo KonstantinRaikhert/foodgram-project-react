@@ -1,9 +1,14 @@
 import csv
+from random import randint
 
 import factory
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient, Tag
-from recipes.tests.factories import IngredientFactory, TagFactory
+from recipes.tests.factories import (
+    IngredientFactory,
+    RecipeFactory,
+    TagFactory,
+)
 from users.tests.factories import SubscribeFactory, UserFactory
 
 
@@ -28,6 +33,12 @@ class AllFactories:
     def create_ingredients(self, arg):
         IngredientFactory.create_batch(arg)
 
+    def create_recipe(self, arg):
+        for _ in range(arg):
+            num_tags = randint(1, 3)
+            num_ingredients = randint(3, 10)
+            RecipeFactory.create(tags=num_tags, ingredients=num_ingredients)
+
 
 all_factories = AllFactories()
 
@@ -38,6 +49,7 @@ OPTIONS_AND_FUNCTIONS = {
     "subscriber": all_factories.create_subscribers,
     "tag": all_factories.create_tags,
     "ingredient": all_factories.create_ingredients,
+    "recipe": all_factories.create_recipe,
 }
 
 MEALTIME_TAGS = ["Завтрак", "Обед", "Ужин"]
@@ -93,8 +105,15 @@ class Command(BaseCommand):
             help="Creates Ingredient objects",
             required=False,
         )
+        parser.add_argument(
+            "--recipe",
+            nargs=1,
+            type=int,
+            help="Creates Recipe objects",
+            required=False,
+        )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa
 
         optional_arguments = 0
         for item in list(OPTIONS_AND_FUNCTIONS):
@@ -128,6 +147,12 @@ class Command(BaseCommand):
                             _, created = Ingredient.objects.get_or_create(
                                 name=row[0], measurement_unit=row[1]
                             )
+                    for _ in range(20):
+                        num_tags = randint(1, 3)
+                        num_ingredients = randint(3, 10)
+                        RecipeFactory.create(
+                            tags=num_tags, ingredients=num_ingredients
+                        )
 
                 self.stdout.write(
                     self.style.SUCCESS("The database is filled with test data")
