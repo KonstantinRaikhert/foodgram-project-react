@@ -26,3 +26,23 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Ingredient(models.Model):
+    name = models.CharField(
+        verbose_name="Название", max_length=200, unique=True, blank=False
+    )
+    measurement_unit = models.CharField(
+        verbose_name="Единицы измерения",
+        max_length=10,
+        unique=True,
+        blank=False,
+    )
+
+    class Meta:
+        verbose_name = "Ингредиент"
+        verbose_name_plural = "Ингредиенты"
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.name
