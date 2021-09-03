@@ -141,7 +141,7 @@ class Command(BaseCommand):
                             name=MEALTIME_TAGS[tag],
                             color=Tag.Color.choices[tag][0],
                         )
-                    with open("../data/ingredients.csv", "r") as f:
+                    with open("data/ingredients.csv", "r") as f:
                         reader = csv.reader(f)
                         for row in reader:
                             _, created = Ingredient.objects.get_or_create(
