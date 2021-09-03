@@ -30,12 +30,12 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
-        verbose_name="Название", max_length=200, unique=True, blank=False
+        verbose_name="Название", max_length=200, blank=False
     )
     measurement_unit = models.CharField(
         verbose_name="Единицы измерения",
         max_length=10,
-        unique=True,
+        # unique=True,
         blank=False,
     )
 

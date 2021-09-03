@@ -16,7 +16,7 @@ class TagFactory(factory.django.DjangoModelFactory):
 class IngredientFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Ingredient
-        django_get_or_create = ["name"]
+        django_get_or_create = ["measurement_unit"]
 
     name = fake.word()
     measurement_unit = fake.word()

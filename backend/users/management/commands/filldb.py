@@ -1,7 +1,9 @@
+import csv
+
 import factory
 from django.core.management.base import BaseCommand
-from recipes.models import Tag
-from recipes.tests.factories import TagFactory
+from recipes.models import Ingredient, Tag
+from recipes.tests.factories import IngredientFactory, TagFactory
 from users.tests.factories import SubscribeFactory, UserFactory
 
 
@@ -20,6 +22,12 @@ class AllFactories:
     def create_subscribers(self, arg):
         SubscribeFactory.create_batch(arg)
 
+    def create_tags(self, arg):
+        TagFactory.create_batch(arg)
+
+    def create_ingredients(self, arg):
+        IngredientFactory.create_batch(arg)
+
 
 all_factories = AllFactories()
 
@@ -28,6 +36,8 @@ OPTIONS_AND_FUNCTIONS = {
     "users_admin": all_factories.create_users_is_staff,
     "users_no_active": all_factories.create_users_no_active,
     "subscriber": all_factories.create_subscribers,
+    "tag": all_factories.create_tags,
+    "ingredient": all_factories.create_ingredients,
 }
 
 MEALTIME_TAGS = ["Завтрак", "Обед", "Ужин"]
@@ -69,6 +79,20 @@ class Command(BaseCommand):
             help="Creates Subscriber objects for each user",
             required=False,
         )
+        parser.add_argument(
+            "--tag",
+            nargs=1,
+            type=int,
+            help="Creates Tag objects",
+            required=False,
+        )
+        parser.add_argument(
+            "--ingredient",
+            nargs=1,
+            type=int,
+            help="Creates Ingredient objects",
+            required=False,
+        )
 
     def handle(self, *args, **options):
 
@@ -98,6 +122,12 @@ class Command(BaseCommand):
                             name=MEALTIME_TAGS[tag],
                             color=Tag.Color.choices[tag][0],
                         )
+                    with open("../data/ingredients.csv", "r") as f:
+                        reader = csv.reader(f)
+                        for row in reader:
+                            _, created = Ingredient.objects.get_or_create(
+                                name=row[0], measurement_unit=row[1]
+                            )
 
                 self.stdout.write(
                     self.style.SUCCESS("The database is filled with test data")
