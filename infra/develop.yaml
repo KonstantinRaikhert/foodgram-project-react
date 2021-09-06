@@ -39,6 +39,7 @@ services:
       - media_value:/code/backend_media/
     command: >
       sh -c "python manage.py migrate &&
+            #  python manage.py collectstatic | yes &&
              python manage.py createadmin &&
              python manage.py filldb"
     depends_on:

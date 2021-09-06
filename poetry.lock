@@ -290,6 +290,17 @@ Django = ">=2.2"
 sqlparse = ">=0.2.0"
 
 [[package]]
+name = "django-debug-toolbar-request-history"
+version = "0.1.3"
+description = "Request History Panel for Django Debug Toolbar"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+django-debug-toolbar = ">=2.0"
+
+[[package]]
 name = "django-extensions"
 version = "3.1.3"
 description = "Extensions for Django"
@@ -1093,7 +1104,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "4903015a49730a3feb264a902373fa8383cb3fb1e5283aa0ba27af328dec54cd"
+content-hash = "503a054fabebdbdf346775feb22e4fd8d95bce944ac1daa8c8cd77ca209b874d"
 
 [metadata.files]
 appdirs = [
@@ -1303,6 +1314,10 @@ django-coverage-plugin = [
 django-debug-toolbar = [
     {file = "django-debug-toolbar-3.2.1.tar.gz", hash = "sha256:a5ff2a54f24bf88286f9872836081078f4baa843dc3735ee88524e89f8821e33"},
     {file = "django_debug_toolbar-3.2.1-py3-none-any.whl", hash = "sha256:e759e63e3fe2d3110e0e519639c166816368701eab4a47fed75d7de7018467b9"},
+]
+django-debug-toolbar-request-history = [
+    {file = "django-debug-toolbar-request-history-0.1.3.tar.gz", hash = "sha256:05935afec547a90149965caad07e2893cabf6ce79db2131e24ffd8ce3361c879"},
+    {file = "django_debug_toolbar_request_history-0.1.3-py2.py3-none-any.whl", hash = "sha256:6bc86251e283be3f9c94b8e70a63c3783eb20bf320fad363adbfa8e1e698149b"},
 ]
 django-extensions = [
     {file = "django-extensions-3.1.3.tar.gz", hash = "sha256:5f0fea7bf131ca303090352577a9e7f8bfbf5489bd9d9c8aea9401db28db34a0"},
