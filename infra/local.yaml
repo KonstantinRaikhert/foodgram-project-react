@@ -1,0 +1,15 @@
+version: '3.8'
+
+volumes:
+  postgres_data_local:
+
+services:
+  postgres-local:
+    image: postgres:13.3
+    restart: always
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.envs/.postgres_local
