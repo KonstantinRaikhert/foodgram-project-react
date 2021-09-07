@@ -111,32 +111,19 @@ AUTH_USER_MODEL = "users.CustomUser"
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAdminUser",
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
     # "EXCEPTION_HANDLER": "bbbs.common.utils.handlers.custom_exception_handler",
-    "DEFAULT_FILTER_BACKENDS": [
-        "django_filters.rest_framework.DjangoFilterBackend",
-    ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 20,
+    # "DEFAULT_FILTER_BACKENDS": [
+    #     "django_filters.rest_framework.DjangoFilterBackend",
+    # ],
+    "DEFAULT_PAGINATION_CLASS": "recipes.pagination.FoodgramPagination",
+    "PAGE_SIZE": 10,
     "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
-    # Django REST Framework JSON CamelCase
-    # https://github.com/vbabiy/djangorestframework-camel-case
-    # ------------------------------------------------------------------------
-    # "DEFAULT_RENDERER_CLASSES": (
-    #     "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
-    #     "djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer",
-    # ),
-    # "DEFAULT_PARSER_CLASSES": (
-    #     "djangorestframework_camel_case.parser.CamelCaseFormParser",
-    #     "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
-    #     "djangorestframework_camel_case.parser.CamelCaseJSONParser",
-    # ),
-    # 'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S",
 }
 
 # Internationalization

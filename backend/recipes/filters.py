@@ -1,6 +1,5 @@
 from django_filters import rest_framework as filters
-from recipes.models import Ingredient, Tag
-from users.models import CustomUser
+from recipes.models import Ingredient, Recipe, Tag
 
 
 class IngredientFilter(filters.FilterSet):
@@ -20,4 +19,7 @@ class RecipeFilter(filters.FilterSet):
         queryset=Tag.objects.all(),
         to_field_name="slug",
     )
-    author = filters.ModelChoiceFilter(queryset=CustomUser.objects.all())
+
+    class Meta:
+        model = Recipe
+        fields = {"author": ["exact"]}

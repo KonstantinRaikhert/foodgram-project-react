@@ -3,7 +3,7 @@ from random import randint
 
 import factory
 from django.core.management.base import BaseCommand
-from recipes.models import Ingredient, Tag
+from recipes.models import Ingredient, Recipe, Tag
 from recipes.tests.factories import (
     IngredientFactory,
     RecipeFactory,
@@ -130,6 +130,8 @@ class Command(BaseCommand):
         if optional_arguments == 0:
             try:
                 with factory.Faker.override_default_locale("ru_RU"):
+                    if Recipe.objects.count() > 10:
+                        raise MyException()
                     UserFactory.create_batch(5)
                     for _ in range(5):
                         UserFactory.create(is_staff=True)
@@ -154,9 +156,11 @@ class Command(BaseCommand):
                             tags=num_tags, ingredients=num_ingredients
                         )
 
-                self.stdout.write(
-                    self.style.SUCCESS("The database is filled with test data")
-                )
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            "The database is filled with test data"
+                        )
+                    )
             except MyException:
                 self.stdout.write(
                     self.style.ERROR(
