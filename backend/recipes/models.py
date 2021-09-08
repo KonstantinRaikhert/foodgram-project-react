@@ -103,3 +103,27 @@ class IngredientItem(models.Model):
 
     def __str__(self):
         return self.ingredient.name
+
+
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, verbose_name="Рецепт"
+    )
+
+    class Meta:
+        verbose_name = "Рецепт в избранном"
+        verbose_name_plural = "Рецепты в избранном"
+        ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_favorite_recipe"
+            )
+        ]
+
+    def __str__(self):
+        return "Пользователь {} добавил {} в избранное.".format(
+            self.user.username, self.recipe.name
+        )
