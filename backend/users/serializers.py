@@ -114,7 +114,6 @@ class AuthorSerializer(UserSerializer):
         ]
 
     def get_recipes(self, obj):
-        # from recipes.serializers import RecipeSubscribeSerializer
 
         request = self.context["request"]
         recipes_limit = request.query_params.get("recipes_limit")

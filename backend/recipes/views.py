@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.filters import RecipeFilter
 from recipes.models import FavoriteRecipe, Ingredient, Recipe, Tag
@@ -62,23 +61,34 @@ class RecipeViewSet(ModelViewSet):
         serializer = FavoriteRecipeSerializer(
             data={"recipe": pk, "user": request.user.id}
         )
+        serializer.is_valid(raise_exception=True)
         if request.method == "GET":
-            serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
                 {"status": "Рецепт добавлен в избранное"},
                 status=status.HTTP_201_CREATED,
             )
-        serializer.is_valid(raise_exception=True)
-        if FavoriteRecipe.objects.filter(**serializer.validated_data):
-            raise serializers.ValidationError(
-                {"message": "Рецепта еще нет в избранном."}
+
+        if request.method == "DELETE":
+            recipe = self.get_object()
+            number_deleted_objects, _ = FavoriteRecipe.objects.filter(
+                user=request.user,
+                recipe=recipe,
+            ).delete()
+
+            if number_deleted_objects == 0:
+                raise serializers.ValidationError(
+                    {"message": "Вы еще не добавили этот рецепт в избранное."}
+                )
+            return Response(
+                {"status": "Рецепт удалён из избранного"},
+                status=status.HTTP_204_NO_CONTENT,
             )
-        delete_recipe = get_object_or_404(
-            FavoriteRecipe, **serializer.validated_data
-        )
-        delete_recipe.delete()
-        return Response(
-            {"status": "Рецепт удалён из избранного"},
-            status=status.HTTP_204_NO_CONTENT,
-        )
+
+    # @action(
+    #     detail=True,
+    #     methods=["GET", "DELETE"],
+    #     url_path="favorite",
+    #     url_name="favorite",
+    #     permission_classes=[permissions.IsAuthenticated],
+    # )
