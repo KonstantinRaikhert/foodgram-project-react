@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model, password_validation
 from django.utils.translation import gettext_lazy as _
 from djoser.serializers import SetPasswordSerializer, UserCreateSerializer
+from recipes.models import Recipe
 from rest_framework import serializers
 from users.models import Subscribe
 
@@ -66,3 +67,65 @@ class UserChangePasswordSerializer(SetPasswordSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class RecipeSubscribeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ["id", "name", "image", "cooking_time"]
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscribe
+        fields = "__all__"
+
+    def create(self, validated_data):
+        author = validated_data["author"]
+        subscriber = validated_data["subscriber"]
+        if author == subscriber:
+            raise serializers.ValidationError(
+                {"message": "Подписка на самого себя невозможна!"}
+            )
+        obj, created = Subscribe.objects.get_or_create(
+            author=author, subscriber=subscriber
+        )
+        if not created:
+            raise serializers.ValidationError(
+                {"message": "Вы уже подписаны на этого автора!"}
+            )
+        return validated_data
+
+
+class AuthorSerializer(UserSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = [
+            "id",
+            "username",
+            "last_name",
+            "first_name",
+            "email",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+        ]
+
+    def get_recipes(self, obj):
+        # from recipes.serializers import RecipeSubscribeSerializer
+
+        request = self.context["request"]
+        recipes_limit = request.query_params.get("recipes_limit")
+        queryset = Recipe.objects.filter(author=obj)
+
+        if recipes_limit is not None and recipes_limit.isnumeric():
+            recipes_limit = int(recipes_limit)
+            queryset = queryset[:recipes_limit]
+
+        return [RecipeSubscribeSerializer(query).data for query in queryset]
+
+    def get_recipes_count(self, obj):
+        qset = Recipe.objects.filter(author=obj)
+        return qset.count()
