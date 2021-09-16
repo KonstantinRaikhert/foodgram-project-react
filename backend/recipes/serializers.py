@@ -8,6 +8,7 @@ from recipes.models import (
     Ingredient,
     IngredientItem,
     Recipe,
+    ShoppingCart,
     Tag,
 )
 from rest_framework import serializers
@@ -232,5 +233,23 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         if not created:
             raise serializers.ValidationError(
                 {"message": "У Вас уже есть этот рецепт в избранном."}
+            )
+        return validated_data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = "__all__"
+
+    def create(self, validated_data):
+        user = validated_data["user"]
+        recipe = validated_data["recipe"]
+        obj, created = ShoppingCart.objects.get_or_create(
+            user=user, recipe=recipe
+        )
+        if not created:
+            raise serializers.ValidationError(
+                {"message": "У Вас уже есть этот рецепт в корзине покупок."}
             )
         return validated_data

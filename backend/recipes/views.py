@@ -1,11 +1,18 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.filters import RecipeFilter
-from recipes.models import FavoriteRecipe, Ingredient, Recipe, Tag
+from recipes.models import (
+    FavoriteRecipe,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
 from recipes.serializers import (
     FavoriteRecipeSerializer,
     IngredientSerializer,
     RecipePostSerializer,
     RecipeSerializer,
+    ShoppingCartSerializer,
     TagSerializer,
 )
 from rest_framework import permissions, serializers, status
@@ -85,10 +92,40 @@ class RecipeViewSet(ModelViewSet):
                 status=status.HTTP_204_NO_CONTENT,
             )
 
-    # @action(
-    #     detail=True,
-    #     methods=["GET", "DELETE"],
-    #     url_path="favorite",
-    #     url_name="favorite",
-    #     permission_classes=[permissions.IsAuthenticated],
-    # )
+    @action(
+        detail=True,
+        methods=["GET", "DELETE"],
+        url_path="shopping_cart",
+        url_name="shopping_cart",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def shopping_cart(self, request, pk):
+        serializer = ShoppingCartSerializer(
+            data={"recipe": pk, "user": request.user.id}
+        )
+        serializer.is_valid(raise_exception=True)
+        if request.method == "GET":
+            serializer.save()
+            return Response(
+                {"status": "Рецепт добавлен в корзину покупок"},
+                status=status.HTTP_201_CREATED,
+            )
+
+        if request.method == "DELETE":
+            recipe = self.get_object()
+            number_deleted_objects, _ = ShoppingCart.objects.filter(
+                user=request.user,
+                recipe=recipe,
+            ).delete()
+
+            if number_deleted_objects == 0:
+                raise serializers.ValidationError(
+                    {
+                        "message": "Вы еще не добавили этот рецепт "
+                        "в корзину покупок."
+                    }
+                )
+            return Response(
+                {"status": "Рецепт удалён из корзины покупок"},
+                status=status.HTTP_204_NO_CONTENT,
+            )

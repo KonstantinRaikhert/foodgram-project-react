@@ -5,8 +5,10 @@ import factory
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient, Recipe, Tag
 from recipes.tests.factories import (
+    FavoriteRecipeFactory,
     IngredientFactory,
     RecipeFactory,
+    ShoppingCartFactory,
     TagFactory,
 )
 from users.tests.factories import SubscribeFactory, UserFactory
@@ -39,6 +41,12 @@ class AllFactories:
             num_ingredients = randint(3, 10)
             RecipeFactory.create(tags=num_tags, ingredients=num_ingredients)
 
+    def create_favorite_recipes(self, arg):
+        FavoriteRecipeFactory.create_batch(arg)
+
+    def create_shopping_cart(self, arg):
+        ShoppingCartFactory.create_batch(arg)
+
 
 all_factories = AllFactories()
 
@@ -50,6 +58,8 @@ OPTIONS_AND_FUNCTIONS = {
     "tag": all_factories.create_tags,
     "ingredient": all_factories.create_ingredients,
     "recipe": all_factories.create_recipe,
+    "favorite": all_factories.create_favorite_recipes,
+    "shopcart": all_factories.create_shopping_cart,
 }
 
 MEALTIME_TAGS = ["Завтрак", "Обед", "Ужин"]
@@ -112,6 +122,20 @@ class Command(BaseCommand):
             help="Creates Recipe objects",
             required=False,
         )
+        parser.add_argument(
+            "--favorite",
+            nargs=1,
+            type=int,
+            help="Creates Recipe objects",
+            required=False,
+        )
+        parser.add_argument(
+            "--shopcart",
+            nargs=1,
+            type=int,
+            help="Creates Recipe objects",
+            required=False,
+        )
 
     def handle(self, *args, **options):  # noqa
 
@@ -155,6 +179,8 @@ class Command(BaseCommand):
                         RecipeFactory.create(
                             tags=num_tags, ingredients=num_ingredients
                         )
+                    FavoriteRecipeFactory.create_batch(6)
+                    ShoppingCartFactory.create_batch(5)
 
                     self.stdout.write(
                         self.style.SUCCESS(
