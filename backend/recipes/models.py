@@ -99,7 +99,6 @@ class IngredientItem(models.Model):
         verbose_name = "Ингредиент в рецепте"
         verbose_name_plural = "Ингредиенты в рецепте"
         ordering = ["id"]
-        # unique_together = ("recipe", "ingredient")
         constraints = [
             models.UniqueConstraint(
                 fields=["recipe", "ingredient"], name="unique_ingredient_item"

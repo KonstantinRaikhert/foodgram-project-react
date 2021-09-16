@@ -27,7 +27,7 @@ repos:
     rev: 3.9.2
     hooks:
       - id: flake8
-        exclude: migrations
+        exclude: (migrations|backend/configuration/settings/)
 
 -   repo: local
     hooks:

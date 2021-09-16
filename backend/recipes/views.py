@@ -1,8 +1,12 @@
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import get_template
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.filters import RecipeFilter
 from recipes.models import (
     FavoriteRecipe,
     Ingredient,
+    IngredientItem,
     Recipe,
     ShoppingCart,
     Tag,
@@ -19,6 +23,7 @@ from rest_framework import permissions, serializers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from xhtml2pdf import pisa
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -129,3 +134,35 @@ class RecipeViewSet(ModelViewSet):
                 {"status": "Рецепт удалён из корзины покупок"},
                 status=status.HTTP_204_NO_CONTENT,
             )
+
+    @action(
+        detail=False,
+        url_path="download_shopping_cart",
+        url_name="download_shopping_cart",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def download_shopping_cart(self, request):
+        user = request.user
+        queryset = IngredientItem.objects.filter(
+            recipe__shoppingcart__user=user
+        )
+        if not queryset.exists():
+            raise serializers.ValidationError(
+                {"message": "Список покупок пуст..."}
+            )
+        context = {"ingredient_list": queryset}
+        context["STATIC_ROOT"] = settings.STATIC_ROOT
+
+        template_path = "cart_list_pdf.html"
+        template = get_template(template_path)
+        html = template.render(context)
+
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="cart.pdf"'
+
+        pisa_status = pisa.CreatePDF(html, dest=response)
+        if pisa_status.err:
+            raise serializers.ValidationError(
+                {"message": "Не удалось подготовить PDF файл."}
+            )
+        return response

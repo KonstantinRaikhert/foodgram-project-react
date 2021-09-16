@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block static_css %}
+<style>
+    @font-face {
+        font-family: DroidSans;
+        src: url("{{STATIC_ROOT}}/fonts/DroidSans.ttf");
+    }
+
+    * {
+        font-family: DroidSans;
+    }
+</style>
+{% endblock %}
+
+{% block page_title %}
+Список покупок
+{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Список покупок</h1>
+</div>
+
+<div>
+    <ul>
+        {% for ingredient in ingredient_list %}
+        <li>
+            <div>
+                <p>
+                    {{ forloop.counter }}.
+                    {{ ingredient.ingredient.name | capfirst }}
+                    — {{ ingredient.amount }}
+                    {{ ingredient.ingredient.measurement_unit }}</p>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+
+
+</div>
+{% endblock %}

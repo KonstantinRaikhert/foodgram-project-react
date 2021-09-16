@@ -65,6 +65,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = UserSerializer()
     is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -81,6 +82,16 @@ class RecipeSerializer(serializers.ModelSerializer):
                 user=request.user, recipe_id=obj.id
             )
             return is_favorited.exists()
+        except TypeError:
+            return False
+
+    def get_is_in_shopping_cart(self, obj):
+        try:
+            request = self.context.get("request")
+            is_in_cart = ShoppingCart.objects.filter(
+                user=request.user, recipe=obj
+            )
+            return is_in_cart.exists()
         except TypeError:
             return False
 
@@ -154,16 +165,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
         print(recipe)
         for tag in tags:
             recipe.tags.add(tag)
-        # items = []
-        # for ingredient in ingredients:
-        #     id = ingredient["id"]
-        #     amount = ingredient["amount"]
-        #     item = IngredientItem(
-        #         recipe=recipe,
-        #         ingredient=get_object_or_404(Ingredient, id=id),
-        #         amount=amount,
-        #     )
-        #     items.append(item)
         items = [
             IngredientItem(
                 recipe=recipe,

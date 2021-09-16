@@ -116,10 +116,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
-    # "EXCEPTION_HANDLER": "bbbs.common.utils.handlers.custom_exception_handler",
-    # "DEFAULT_FILTER_BACKENDS": [
-    #     "django_filters.rest_framework.DjangoFilterBackend",
-    # ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
     "DEFAULT_PAGINATION_CLASS": "recipes.pagination.FoodgramPagination",
     "PAGE_SIZE": 10,
     "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S",
@@ -149,6 +148,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, "backend_static")
 
 MEDIA_URL = "/backend_media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "backend_media")
+
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
