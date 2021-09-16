@@ -88,7 +88,7 @@ class IngredientItem(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name="ingredients",
+        related_name="recipe_ingredients",
         verbose_name="Ингредиент",
     )
     amount = models.PositiveSmallIntegerField(
@@ -99,7 +99,61 @@ class IngredientItem(models.Model):
         verbose_name = "Ингредиент в рецепте"
         verbose_name_plural = "Ингредиенты в рецепте"
         ordering = ["id"]
-        unique_together = ("recipe", "ingredient")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recipe", "ingredient"], name="unique_ingredient_item"
+            )
+        ]
 
     def __str__(self):
         return self.ingredient.name
+
+
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, verbose_name="Рецепт"
+    )
+
+    class Meta:
+        verbose_name = "Рецепт в избранном"
+        verbose_name_plural = "Рецепты в избранном"
+        ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_favorite_recipe"
+            )
+        ]
+
+    def __str__(self):
+        return "Пользователь {} добавил {} в избранное.".format(
+            self.user.username, self.recipe.name
+        )
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, verbose_name="Рецепт"
+    )
+
+    class Meta:
+        verbose_name = "Объект списка покупок"
+        verbose_name_plural = "Объекты списка покупок"
+        ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"],
+                name="Unique ShoppingCart for user and recipe",
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"Рецепт {self.recipe.name} из корзины покупок "
+            f"пользователя {self.user.username}."
+        )

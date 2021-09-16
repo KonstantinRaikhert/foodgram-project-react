@@ -4,7 +4,14 @@ import urllib
 import factory
 from django.core.files.base import ContentFile
 from faker import Faker
-from recipes.models import Ingredient, IngredientItem, Recipe, Tag
+from recipes.models import (
+    FavoriteRecipe,
+    Ingredient,
+    IngredientItem,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
 from users.models import CustomUser
 
 fake = Faker(["ru_Ru"])
@@ -85,3 +92,21 @@ class RecipeFactory(factory.django.DjangoModelFactory):
 
         image = urllib.request.urlopen("https://picsum.photos/800/800").read()
         self.image.save(self.name + ".jpg", ContentFile(image), save=False)
+
+
+class FavoriteRecipeFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = FavoriteRecipe
+        django_get_or_create = ["user", "recipe"]
+
+    user = factory.Iterator(CustomUser.objects.all())
+    recipe = factory.Iterator(Recipe.objects.all())
+
+
+class ShoppingCartFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ShoppingCart
+        django_get_or_create = ["user", "recipe"]
+
+    user = factory.Iterator(CustomUser.objects.all())
+    recipe = factory.Iterator(Recipe.objects.all())

@@ -1,6 +1,12 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import (
+    FavoriteRecipe,
+    Ingredient,
+    IngredientItem,
+    Recipe,
+    Tag,
+)
 from utilites.mixins import AdminColor
 
 
@@ -13,15 +19,26 @@ class TagAdmin(AdminColor, admin.ModelAdmin):
 
 
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ("name", "measurement_unit")
+    list_display = ("id", "name", "measurement_unit")
     search_fields = ("name",)
     list_filter = ("measurement_unit",)
     ordering = ("name",)
 
 
+class IngredientItemAdmin(admin.ModelAdmin):
+    list_display = ("id", "recipe", "ingredient")
+
+
 class IngridientItemAdmin(admin.StackedInline):
     model = Recipe.ingredients.through
     extra = 0
+
+
+class FavoriteRecipeAdmin(admin.ModelAdmin):
+    list_display = ("user", "recipe")
+    search_fields = ("user", "recipe")
+    list_filter = ("user",)
+    ordering = ("user",)
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -69,3 +86,5 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag, TagAdmin)
+admin.site.register(FavoriteRecipe, FavoriteRecipeAdmin)
+admin.site.register(IngredientItem, IngredientItemAdmin)
