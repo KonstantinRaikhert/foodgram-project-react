@@ -138,3 +138,5 @@ dmypy.json
 #static
 backend_static/
 backend_media/
+backend_media/recipes
+backend_static/admin
