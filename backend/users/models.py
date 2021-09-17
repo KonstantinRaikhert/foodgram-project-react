@@ -31,33 +31,57 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
-        max_length=255, unique=True, verbose_name="Электронная почта"
+        max_length=255,
+        unique=True,
+        verbose_name="Электронная почта",
+        help_text="Введите электронную почту",
     )
     username = models.CharField(
-        max_length=255, unique=True, verbose_name="Имя пользователя"
+        max_length=255,
+        unique=True,
+        verbose_name="Имя пользователя",
+        help_text="Введите имя пользователя",
     )
-    first_name = models.CharField(max_length=255, verbose_name="Имя")
-    last_name = models.CharField(max_length=255, verbose_name="Фамилия")
+    first_name = models.CharField(
+        max_length=255,
+        verbose_name="Имя",
+        help_text="Введите имя пользователя",
+    )
+    last_name = models.CharField(
+        max_length=255,
+        verbose_name="Фамилия",
+        help_text="Введите фамилию пользователя",
+    )
     is_active = models.BooleanField(
-        default=True, verbose_name="Статус активности"
+        default=True,
+        verbose_name="Статус активности",
+        help_text="Блокировка пользователя",
     )
     is_staff = models.BooleanField(
-        default=False, verbose_name="Статус администратора"
+        default=False,
+        verbose_name="Статус администратора",
+        help_text="Укажите статус пользователя",
     )
     is_superuser = models.BooleanField(
-        default=False, verbose_name="Статус суперпользователя"
+        default=False,
+        verbose_name="Статус суперпользователя",
+        help_text="Указывает, есть ли у пользователя суперправа",
     )
     date_joined = models.DateTimeField(
-        default=timezone.now, verbose_name="Дата регистрации"
+        default=timezone.now,
+        verbose_name="Дата регистрации",
+        help_text="Дата регистрации пользователя",
     )
     last_login = models.DateTimeField(
-        null=True, verbose_name="Последнее посещение"
+        null=True,
+        verbose_name="Последнее посещение",
+        help_text="Последнее посещение пользователя",
     )
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
+    REQUIRED_FIELDS = ("username", "first_name", "last_name")
 
     class Meta:
         verbose_name = "Пользователь"
@@ -85,23 +109,24 @@ class Subscribe(models.Model):
         on_delete=models.CASCADE,
         related_name="author",
         verbose_name="Автор",
+        help_text="Укажите автора",
     )
     subscriber = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         related_name="subscriber",
         verbose_name="Подписчик",
+        help_text="Укажите подписчика автора",
     )
 
     class Meta:
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
-        ordering = ["id"]
-        constraints = [
+        constraints = (
             UniqueConstraint(
-                fields=["author", "subscriber"], name="unique_subscription"
-            )
-        ]
+                fields=("author", "subscriber"), name="unique_subscription"
+            ),
+        )
 
     def __str__(self):
         return (

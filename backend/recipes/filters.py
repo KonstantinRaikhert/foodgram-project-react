@@ -7,7 +7,7 @@ class IngredientFilter(filters.FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ["name"]
+        fields = ("name",)
 
     def starts_with(self, queryset, slug, name):
         return queryset.filter(name__startswith=name)
@@ -22,4 +22,4 @@ class RecipeFilter(filters.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = {"author": ["exact"]}
+        fields = {"author": ("exact",)}

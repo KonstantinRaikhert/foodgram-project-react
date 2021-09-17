@@ -1,6 +1,4 @@
 from django.db import transaction
-
-# from django.http import request
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (
@@ -13,6 +11,22 @@ from recipes.models import (
 )
 from rest_framework import serializers
 from users.serializers import UserSerializer
+
+SAME_INGREDIENTS_ERROR = serializers.ValidationError(
+    {"message": "Одинаковых ингредиентов в одном рецепте быть не может."}
+)
+INGREDIENT_AMOUNT_ERROR = serializers.ValidationError(
+    {"message": "Введите количество ингредиентов в целочисленном формате"}
+)
+SAME_RECIPE_ERROR = serializers.ValidationError(
+    {"message": "Рецепт с таким названием уже есть!"}
+)
+SAME_RECIPE_IN_FAVORITE_ERROR = serializers.ValidationError(
+    {"message": "У Вас уже есть этот рецепт в избранном."}
+)
+SAME_RECIPE_IN_SHOPPINGCART_ERROR = serializers.ValidationError(
+    {"message": "У Вас уже есть этот рецепт в корзине покупок."}
+)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -41,7 +55,7 @@ class IngredientItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IngredientItem
-        fields = ["id", "name", "measurement_unit", "amount"]
+        fields = ("id", "name", "measurement_unit", "amount")
 
 
 class IngredientItemPostSerializer(serializers.Serializer):
@@ -51,12 +65,7 @@ class IngredientItemPostSerializer(serializers.Serializer):
     def validate(self, data):
         amount = data["amount"]
         if not amount.isnumeric():
-            raise serializers.ValidationError(
-                {
-                    "message": "Введите количество ингредиентов "
-                    "в целочисленном формате"
-                }
-            )
+            raise INGREDIENT_AMOUNT_ERROR
         return data
 
 
@@ -76,24 +85,18 @@ class RecipeSerializer(serializers.ModelSerializer):
         return IngredientItemSerializer(q_set, many=True).data
 
     def get_is_favorited(self, obj):
-        try:
-            request = self.context.get("request")
-            is_favorited = FavoriteRecipe.objects.filter(
-                user=request.user, recipe_id=obj.id
-            )
-            return is_favorited.exists()
-        except TypeError:
-            return False
+        request = self.context.get("request")
+        is_favorited = FavoriteRecipe.objects.filter(
+            user=request.user, recipe_id=obj.id
+        ).exists()
+        return is_favorited
 
     def get_is_in_shopping_cart(self, obj):
-        try:
-            request = self.context.get("request")
-            is_in_cart = ShoppingCart.objects.filter(
-                user=request.user, recipe=obj
-            )
-            return is_in_cart.exists()
-        except TypeError:
-            return False
+        request = self.context.get("request")
+        is_in_cart = ShoppingCart.objects.filter(
+            user=request.user, recipe=obj
+        ).exists()
+        return is_in_cart
 
 
 class RecipePostSerializer(serializers.ModelSerializer):
@@ -105,7 +108,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = [
+        fields = (
             "id",
             "image",
             "ingredients",
@@ -113,7 +116,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
             "name",
             "text",
             "cooking_time",
-        ]
+        )
 
     def validate(self, data):
         unique_ingr = data["ingredients"]
@@ -126,34 +129,22 @@ class RecipePostSerializer(serializers.ModelSerializer):
                     IngredientItem, id=id, amount=amount
                 )
                 if exist_item.ingredient in ingr_list:
-                    raise serializers.ValidationError(
-                        {
-                            "message": "Одинаковых ингредиентов в одном "
-                            "рецепте быть не может."
-                        }
-                    )
+                    raise SAME_INGREDIENTS_ERROR
                 else:
                     ingr_list.append(exist_item.ingredient)
             except Exception:
                 new_ingr = get_object_or_404(Ingredient, id=id)
                 if new_ingr in ingr_list:
-                    raise serializers.ValidationError(
-                        {
-                            "message": "Одинаковых ингредиентов в одном "
-                            "рецепте быть не может."
-                        }
-                    )
+                    raise SAME_INGREDIENTS_ERROR
                 else:
                     ingr_list.append(new_ingr)
 
         if self.context["request"].method in ("POST",):
             if Recipe.objects.filter(name=data["name"]):
-                raise serializers.ValidationError(
-                    {"message": "Рецепт с таким названием уже есть!"}
-                )
+                raise SAME_RECIPE_ERROR
         return data
 
-    # @transaction.atomic
+    @transaction.atomic
     def create(self, validated_data):
         request = self.context["request"]
         image = validated_data.pop("image")
@@ -162,7 +153,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(
             author=request.user, image=image, **validated_data
         )
-        print(recipe)
         for tag in tags:
             recipe.tags.add(tag)
         items = [
@@ -232,9 +222,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             user=user, recipe=recipe
         )
         if not created:
-            raise serializers.ValidationError(
-                {"message": "У Вас уже есть этот рецепт в избранном."}
-            )
+            raise SAME_RECIPE_IN_FAVORITE_ERROR
         return validated_data
 
 
@@ -246,11 +234,9 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = validated_data["user"]
         recipe = validated_data["recipe"]
-        obj, created = ShoppingCart.objects.get_or_create(
+        _, created = ShoppingCart.objects.get_or_create(
             user=user, recipe=recipe
         )
         if not created:
-            raise serializers.ValidationError(
-                {"message": "У Вас уже есть этот рецепт в корзине покупок."}
-            )
+            raise SAME_RECIPE_IN_SHOPPINGCART_ERROR
         return validated_data
