@@ -13,7 +13,7 @@ from utilites.mixins import AdminColor
 class TagAdmin(AdminColor, admin.ModelAdmin):
     list_display = ("name", "slug", "colored_circle")
     prepopulated_fields = {
-        "slug": ["name"],
+        "slug": ("name",),
     }
     ordering = ("id",)
 
@@ -42,15 +42,15 @@ class FavoriteRecipeAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    inlines = [IngridientItemAdmin]
-    list_display = [
+    inlines = (IngridientItemAdmin,)
+    list_display = (
         "id",
         "author",
         "name",
         "cooking_time",
         "image_list_preview",
-    ]
-    exclude = ["ingredients"]
+    )
+    exclude = ("ingredients",)
     search_fields = ("name", "author__username")
     list_filter = ("name", "cooking_time", "author")
     filter_horizontal = ("tags",)

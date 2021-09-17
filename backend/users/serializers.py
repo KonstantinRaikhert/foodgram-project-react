@@ -7,6 +7,16 @@ from users.models import Subscribe
 
 User = get_user_model()
 
+CURRENT_PASSWORD_ERROR = serializers.ValidationError(
+    _("Текущий пароль неверный. Попробуйте снова")
+)
+SUBSCRIBE_YOURSELF_ERROR = serializers.ValidationError(
+    {"message": "Подписка на самого себя невозможна!"}
+)
+SAME_SUBSCRIBE_ERROR = serializers.ValidationError(
+    {"message": "Вы уже подписаны на этого автора!"}
+)
+
 
 class UserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
@@ -26,23 +36,41 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
+        fields = (
             "id",
             "username",
             "last_name",
             "first_name",
             "email",
             "is_subscribed",
-        ]
+        )
 
     def get_is_subscribed(self, obj):
-        try:
-            request = self.context.get("request")
-            subscription = Subscribe.objects.filter(
+        # try:
+        #     request = self.context.get("request")
+        #     if Subscribe.objects.filter(
+        #         subscriber=request.user, author=obj
+        #     ).exists():
+        #         return True
+        # except (TypeError, AttributeError):  # Если request.user.is_anonimous
+        #     return False
+
+        # В некоторых случаях request.user является анонимусом
+        # поэтому TypeError
+        # При первичном открытии сайта - request == None
+        # Аналогичная ситуация в рецептах.
+        # Нормальная ли это практика? или стоит по другому реализовать?
+
+        request = self.context.get("request")
+        if request is None:
+            return False
+        if request.user.is_anonymous:
+            return False
+        else:
+            if Subscribe.objects.filter(
                 subscriber=request.user, author=obj
-            )
-            return subscription.exists()
-        except (TypeError, AttributeError):
+            ).exists():
+                return True
             return False
 
 
@@ -50,9 +78,7 @@ class UserChangePasswordSerializer(SetPasswordSerializer):
     def validate_current_password(self, value):
         is_password_valid = self.context["request"].user.check_password(value)
         if not is_password_valid:
-            raise serializers.ValidationError(
-                _("Текущий пароль неверный. Попробуйте снова")
-            )
+            raise CURRENT_PASSWORD_ERROR
         return value
 
     def validate(self, data):
@@ -72,7 +98,7 @@ class UserChangePasswordSerializer(SetPasswordSerializer):
 class RecipeSubscribeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ["id", "name", "image", "cooking_time"]
+        fields = ("id", "name", "image", "cooking_time")
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
@@ -84,16 +110,12 @@ class SubscribeSerializer(serializers.ModelSerializer):
         author = validated_data["author"]
         subscriber = validated_data["subscriber"]
         if author == subscriber:
-            raise serializers.ValidationError(
-                {"message": "Подписка на самого себя невозможна!"}
-            )
-        obj, created = Subscribe.objects.get_or_create(
+            raise SUBSCRIBE_YOURSELF_ERROR
+        _, created = Subscribe.objects.get_or_create(
             author=author, subscriber=subscriber
         )
         if not created:
-            raise serializers.ValidationError(
-                {"message": "Вы уже подписаны на этого автора!"}
-            )
+            raise SAME_SUBSCRIBE_ERROR
         return validated_data
 
 
@@ -102,7 +124,7 @@ class AuthorSerializer(UserSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = [
+        fields = (
             "id",
             "username",
             "last_name",
@@ -111,7 +133,7 @@ class AuthorSerializer(UserSerializer):
             "is_subscribed",
             "recipes",
             "recipes_count",
-        ]
+        )
 
     def get_recipes(self, obj):
 

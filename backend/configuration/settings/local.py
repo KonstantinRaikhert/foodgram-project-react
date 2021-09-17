@@ -15,10 +15,10 @@ DEBUG = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env(
     "DJANGO_SECRET_KEY",
-    default="django-insecure-=3jsy^o^qfdbx(xzje+^y(9-o@od*6c+8vb104=0o8l4bvf5o%",
+    default="django-insecure-=3js",
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ("localhost", "0.0.0.0", "127.0.0.1")
 
 
 # django-debug-toolbar

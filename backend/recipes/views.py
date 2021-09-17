@@ -25,18 +25,31 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from xhtml2pdf import pisa
 
+FAVORITE_RECIPE_ERROR = serializers.ValidationError(
+    {"message": "Вы еще не добавили этот рецепт в избранное."}
+)
+SHOPPINGCART_RECIPE_ERROR = serializers.ValidationError(
+    {"message": "Вы еще не добавили этот рецепт в корзину покупок."}
+)
+SHOPPINGCART_EMPTY_ERROR = serializers.ValidationError(
+    {"message": "Список покупок пуст..."}
+)
+CREATE_PDF_ERROR = serializers.ValidationError(
+    {"message": "Не удалось подготовить PDF файл."}
+)
+
 
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = None
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = None
 
 
@@ -44,10 +57,10 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
-        queryset = Recipe.objects.all().order_by("-id")
+        queryset = Recipe.objects.all()
         is_favorited = self.request.query_params.get("is_favorited")
         favorite = FavoriteRecipe.objects.filter(user=self.request.user.id)
 
@@ -61,6 +74,47 @@ class RecipeViewSet(ModelViewSet):
         if self.action != "list" and self.action != "retrieve":
             return RecipePostSerializer
         return RecipeSerializer
+
+    # Такая реализация не проходит, url должен быть единым
+    # Подскажите пожалуйста, как это изящно реализовать?
+    # @action(
+    #     detail=True,
+    #     methods=("GET",),
+    #     url_path="favorite",
+    #     url_name="favorite",
+    #     permission_classes=(permissions.IsAuthenticated,),
+    # )
+    # def favorite(self, request, pk):
+    #     serializer = FavoriteRecipeSerializer(
+    #         data={"recipe": pk, "user": request.user.id}
+    #     )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(
+    #         {"status": "Рецепт добавлен в избранное"},
+    #         status=status.HTTP_201_CREATED,
+    #     )
+
+    # @action(
+    #     detail=True,
+    #     methods=("DELETE",),
+    #     url_path="favorite",
+    #     url_name="favorite",
+    #     permission_classes=(permissions.IsAuthenticated,),
+    # )
+    # def favorite(self, request, pk):
+    #     recipe = self.get_object()
+    #     number_deleted_objects, _ = FavoriteRecipe.objects.filter(
+    #         user=request.user,
+    #         recipe=recipe,
+    #     ).delete()
+
+    #     if number_deleted_objects == 0:
+    #         raise FAVORITE_RECIPE_ERROR
+    #     return Response(
+    #         {"status": "Рецепт удалён из избранного"},
+    #         status=status.HTTP_204_NO_CONTENT,
+    #     )
 
     @action(
         detail=True,
@@ -80,18 +134,14 @@ class RecipeViewSet(ModelViewSet):
                 {"status": "Рецепт добавлен в избранное"},
                 status=status.HTTP_201_CREATED,
             )
-
         if request.method == "DELETE":
             recipe = self.get_object()
             number_deleted_objects, _ = FavoriteRecipe.objects.filter(
                 user=request.user,
                 recipe=recipe,
             ).delete()
-
             if number_deleted_objects == 0:
-                raise serializers.ValidationError(
-                    {"message": "Вы еще не добавили этот рецепт в избранное."}
-                )
+                raise FAVORITE_RECIPE_ERROR
             return Response(
                 {"status": "Рецепт удалён из избранного"},
                 status=status.HTTP_204_NO_CONTENT,
@@ -99,10 +149,10 @@ class RecipeViewSet(ModelViewSet):
 
     @action(
         detail=True,
-        methods=["GET", "DELETE"],
+        methods=("GET", "DELETE"),
         url_path="shopping_cart",
         url_name="shopping_cart",
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=(permissions.IsAuthenticated,),
     )
     def shopping_cart(self, request, pk):
         serializer = ShoppingCartSerializer(
@@ -124,12 +174,7 @@ class RecipeViewSet(ModelViewSet):
             ).delete()
 
             if number_deleted_objects == 0:
-                raise serializers.ValidationError(
-                    {
-                        "message": "Вы еще не добавили этот рецепт "
-                        "в корзину покупок."
-                    }
-                )
+                raise SHOPPINGCART_RECIPE_ERROR
             return Response(
                 {"status": "Рецепт удалён из корзины покупок"},
                 status=status.HTTP_204_NO_CONTENT,
@@ -139,7 +184,7 @@ class RecipeViewSet(ModelViewSet):
         detail=False,
         url_path="download_shopping_cart",
         url_name="download_shopping_cart",
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=(permissions.IsAuthenticated,),
     )
     def download_shopping_cart(self, request):
         user = request.user
@@ -147,9 +192,7 @@ class RecipeViewSet(ModelViewSet):
             recipe__shoppingcart__user=user
         )
         if not queryset.exists():
-            raise serializers.ValidationError(
-                {"message": "Список покупок пуст..."}
-            )
+            raise SHOPPINGCART_EMPTY_ERROR
         context = {"ingredient_list": queryset}
         context["STATIC_ROOT"] = settings.STATIC_ROOT
 
@@ -162,7 +205,5 @@ class RecipeViewSet(ModelViewSet):
 
         pisa_status = pisa.CreatePDF(html, dest=response)
         if pisa_status.err:
-            raise serializers.ValidationError(
-                {"message": "Не удалось подготовить PDF файл."}
-            )
+            raise CREATE_PDF_ERROR
         return response
