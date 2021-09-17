@@ -42,9 +42,9 @@ class UserViewSet(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
-        detail=False,
+        detail=True,
         methods=("GET", "DELETE"),
-        url_path="(?P<pk>[^/.]+)/subscribe",
+        url_path="subscribe",
         url_name="subscribe",
         permission_classes=(permissions.IsAuthenticated,),
     )

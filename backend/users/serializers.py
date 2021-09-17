@@ -46,11 +46,32 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
+        # try:
+        #     request = self.context.get("request")
+        #     if Subscribe.objects.filter(
+        #         subscriber=request.user, author=obj
+        #     ).exists():
+        #         return True
+        # except (TypeError, AttributeError):  # Если request.user.is_anonimous
+        #     return False
+
+        # В некоторых случаях request.user является анонимусом
+        # поэтому TypeError
+        # При первичном открытии сайта - request == None
+        # Аналогичная ситуация в рецептах.
+        # Нормальная ли это практика? или стоит по другому реализовать?
+
         request = self.context.get("request")
-        subscription = Subscribe.objects.filter(
-            subscriber=request.user, author=obj
-        ).exists()
-        return subscription
+        if request is None:
+            return False
+        if request.user.is_anonymous:
+            return False
+        else:
+            if Subscribe.objects.filter(
+                subscriber=request.user, author=obj
+            ).exists():
+                return True
+            return False
 
 
 class UserChangePasswordSerializer(SetPasswordSerializer):
