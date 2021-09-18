@@ -77,75 +77,75 @@ class RecipeViewSet(ModelViewSet):
 
     # Такая реализация не проходит, url должен быть единым
     # Подскажите пожалуйста, как это изящно реализовать?
+    @action(
+        detail=False,
+        # methods=("GET",),
+        # url_path="(?P<pk>\d+)/favorite",
+        # url_name="favorite",
+        permission_classes=(permissions.IsAuthenticated,),
+    )
+    def favorite_get(self, request, pk):
+        serializer = FavoriteRecipeSerializer(
+            data={"recipe": pk, "user": request.user.id}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"status": "Рецепт добавлен в избранное"},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=False,
+        methods=("DELETE",),
+        # url_path="(?P<pk>\d+)/favorite",
+        # url_name="favorite",
+        permission_classes=(permissions.IsAuthenticated,),
+    )
+    def favorite_delete(self, request, pk):
+        recipe = self.get_object()
+        number_deleted_objects, _ = FavoriteRecipe.objects.filter(
+            user=request.user,
+            recipe=recipe,
+        ).delete()
+
+        if number_deleted_objects == 0:
+            raise FAVORITE_RECIPE_ERROR
+        return Response(
+            {"status": "Рецепт удалён из избранного"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
     # @action(
     #     detail=True,
-    #     methods=("GET",),
+    #     methods=["GET", "DELETE"],
     #     url_path="favorite",
     #     url_name="favorite",
-    #     permission_classes=(permissions.IsAuthenticated,),
+    #     permission_classes=[permissions.IsAuthenticated],
     # )
     # def favorite(self, request, pk):
     #     serializer = FavoriteRecipeSerializer(
     #         data={"recipe": pk, "user": request.user.id}
     #     )
     #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(
-    #         {"status": "Рецепт добавлен в избранное"},
-    #         status=status.HTTP_201_CREATED,
-    #     )
-
-    # @action(
-    #     detail=True,
-    #     methods=("DELETE",),
-    #     url_path="favorite",
-    #     url_name="favorite",
-    #     permission_classes=(permissions.IsAuthenticated,),
-    # )
-    # def favorite(self, request, pk):
-    #     recipe = self.get_object()
-    #     number_deleted_objects, _ = FavoriteRecipe.objects.filter(
-    #         user=request.user,
-    #         recipe=recipe,
-    #     ).delete()
-
-    #     if number_deleted_objects == 0:
-    #         raise FAVORITE_RECIPE_ERROR
-    #     return Response(
-    #         {"status": "Рецепт удалён из избранного"},
-    #         status=status.HTTP_204_NO_CONTENT,
-    #     )
-
-    @action(
-        detail=True,
-        methods=["GET", "DELETE"],
-        url_path="favorite",
-        url_name="favorite",
-        permission_classes=[permissions.IsAuthenticated],
-    )
-    def favorite(self, request, pk):
-        serializer = FavoriteRecipeSerializer(
-            data={"recipe": pk, "user": request.user.id}
-        )
-        serializer.is_valid(raise_exception=True)
-        if request.method == "GET":
-            serializer.save()
-            return Response(
-                {"status": "Рецепт добавлен в избранное"},
-                status=status.HTTP_201_CREATED,
-            )
-        if request.method == "DELETE":
-            recipe = self.get_object()
-            number_deleted_objects, _ = FavoriteRecipe.objects.filter(
-                user=request.user,
-                recipe=recipe,
-            ).delete()
-            if number_deleted_objects == 0:
-                raise FAVORITE_RECIPE_ERROR
-            return Response(
-                {"status": "Рецепт удалён из избранного"},
-                status=status.HTTP_204_NO_CONTENT,
-            )
+    #     if request.method == "GET":
+    #         serializer.save()
+    #         return Response(
+    #             {"status": "Рецепт добавлен в избранное"},
+    #             status=status.HTTP_201_CREATED,
+    #         )
+    #     if request.method == "DELETE":
+    #         recipe = self.get_object()
+    #         number_deleted_objects, _ = FavoriteRecipe.objects.filter(
+    #             user=request.user,
+    #             recipe=recipe,
+    #         ).delete()
+    #         if number_deleted_objects == 0:
+    #             raise FAVORITE_RECIPE_ERROR
+    #         return Response(
+    #             {"status": "Рецепт удалён из избранного"},
+    #             status=status.HTTP_204_NO_CONTENT,
+    #         )
 
     @action(
         detail=True,
