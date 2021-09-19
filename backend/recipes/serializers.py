@@ -63,7 +63,7 @@ class IngredientItemPostSerializer(serializers.Serializer):
     amount = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        amount = data["amount"]
+        amount = data.get("amount")
         if not amount.isnumeric():
             raise INGREDIENT_AMOUNT_ERROR
         return data
@@ -85,42 +85,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         return IngredientItemSerializer(q_set, many=True).data
 
     def get_is_favorited(self, obj):
-        # try:
-        #     request = self.context.get("request")
-        #     is_favorited = FavoriteRecipe.objects.filter(
-        #         user=request.user, recipe_id=obj.id
-        #     )
-        #     return is_favorited.exists()
-        # except TypeError:  # Тоже request.user.is_anonimous
-        #     return False
         request = self.context.get("request")
         if request.user.is_anonymous:
             return False
-        else:
-            if FavoriteRecipe.objects.filter(
-                user=request.user, recipe_id=obj.id
-            ).exists():
-                return True
-            return False
+        return FavoriteRecipe.objects.filter(
+            user=request.user, recipe_id=obj.id
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        # try:
-        #     request = self.context.get("request")
-        #     is_in_cart = ShoppingCart.objects.filter(
-        #         user=request.user, recipe=obj
-        #     )
-        #     return is_in_cart.exists()
-        # except TypeError:
-        #     return False
         request = self.context.get("request")
         if request.user.is_anonymous:
             return False
-        else:
-            if ShoppingCart.objects.filter(
-                user=request.user, recipe=obj
-            ).exists():
-                return True
-            return False
+        return ShoppingCart.objects.filter(
+            user=request.user, recipe=obj
+        ).exists()
 
 
 class RecipePostSerializer(serializers.ModelSerializer):
@@ -143,7 +121,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        unique_ingr = data["ingredients"]
+        unique_ingr = data.get("ingredients")
         ingr_list = []
         for item in unique_ingr:
             id = item["id"]
@@ -154,23 +132,21 @@ class RecipePostSerializer(serializers.ModelSerializer):
                 )
                 if exist_item.ingredient in ingr_list:
                     raise SAME_INGREDIENTS_ERROR
-                else:
-                    ingr_list.append(exist_item.ingredient)
+                ingr_list.append(exist_item.ingredient)
             except Exception:
                 new_ingr = get_object_or_404(Ingredient, id=id)
                 if new_ingr in ingr_list:
                     raise SAME_INGREDIENTS_ERROR
-                else:
-                    ingr_list.append(new_ingr)
+                ingr_list.append(new_ingr)
 
         if self.context["request"].method in ("POST",):
-            if Recipe.objects.filter(name=data["name"]):
+            if Recipe.objects.filter(name=data.get("name")).exists():
                 raise SAME_RECIPE_ERROR
         return data
 
     @transaction.atomic
     def create(self, validated_data):
-        request = self.context["request"]
+        request = self.context.get("request")
         image = validated_data.pop("image")
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
@@ -194,12 +170,10 @@ class RecipePostSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
-        try:
+        if validated_data.get("image"):
             image = validated_data.pop("image")
             instance.image = image
             instance.save()
-        except KeyError:
-            pass
 
         recipe = Recipe.objects.filter(id=instance.id)
         recipe.update(**validated_data)
@@ -217,6 +191,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         for item in ingredients:
             try:
                 id = item["id"]
+                amount = item["amount"]
                 exists_item_ingredient = IngredientItem.objects.get(
                     ingredient_id=id, recipe=instance
                 )
@@ -240,9 +215,9 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        user = validated_data["user"]
-        recipe = validated_data["recipe"]
-        obj, created = FavoriteRecipe.objects.get_or_create(
+        user = validated_data.get("user")
+        recipe = validated_data.get("recipe")
+        _, created = FavoriteRecipe.objects.get_or_create(
             user=user, recipe=recipe
         )
         if not created:
@@ -256,8 +231,8 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        user = validated_data["user"]
-        recipe = validated_data["recipe"]
+        user = validated_data.get("user")
+        recipe = validated_data.get("recipe")
         _, created = ShoppingCart.objects.get_or_create(
             user=user, recipe=recipe
         )

@@ -37,6 +37,8 @@ SHOPPINGCART_EMPTY_ERROR = serializers.ValidationError(
 CREATE_PDF_ERROR = serializers.ValidationError(
     {"message": "Не удалось подготовить PDF файл."}
 )
+METHOD_GET = "GET"
+METHOD_DELETE = "DELETE"
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -75,20 +77,21 @@ class RecipeViewSet(ModelViewSet):
             return RecipePostSerializer
         return RecipeSerializer
 
-    # Такая реализация не проходит, url должен быть единым
-    # Подскажите пожалуйста, как это изящно реализовать?
     # @action(
-    #     detail=True,
-    #     methods=("GET",),
-    #     url_path="favorite",
-    #     url_name="favorite",
-    #     permission_classes=(permissions.IsAuthenticated,),
+    #     detail=False,
+    #     methods=[
+    #         "get",
+    #     ],
+    #     url_path="<pk>/favorite",
+    #     url_name="get-favorite",
+    #     permission_classes=[permissions.IsAuthenticated],
     # )
-    # def favorite(self, request, pk):
+    # def get_favorite(self, request, pk):
     #     serializer = FavoriteRecipeSerializer(
     #         data={"recipe": pk, "user": request.user.id}
     #     )
     #     serializer.is_valid(raise_exception=True)
+    #     # if request.method == METHOD_GET:
     #     serializer.save()
     #     return Response(
     #         {"status": "Рецепт добавлен в избранное"},
@@ -97,18 +100,17 @@ class RecipeViewSet(ModelViewSet):
 
     # @action(
     #     detail=True,
-    #     methods=("DELETE",),
+    #     methods=METHOD_DELETE,
     #     url_path="favorite",
-    #     url_name="favorite",
-    #     permission_classes=(permissions.IsAuthenticated,),
+    #     # url_name="favorite",
+    #     permission_classes=[permissions.IsAuthenticated],
     # )
-    # def favorite(self, request, pk):
+    # def delete_favorite(self, request, pk):
     #     recipe = self.get_object()
     #     number_deleted_objects, _ = FavoriteRecipe.objects.filter(
     #         user=request.user,
     #         recipe=recipe,
     #     ).delete()
-
     #     if number_deleted_objects == 0:
     #         raise FAVORITE_RECIPE_ERROR
     #     return Response(
@@ -118,7 +120,7 @@ class RecipeViewSet(ModelViewSet):
 
     @action(
         detail=True,
-        methods=["GET", "DELETE"],
+        methods=(METHOD_GET, METHOD_DELETE),
         url_path="favorite",
         url_name="favorite",
         permission_classes=[permissions.IsAuthenticated],
@@ -128,13 +130,13 @@ class RecipeViewSet(ModelViewSet):
             data={"recipe": pk, "user": request.user.id}
         )
         serializer.is_valid(raise_exception=True)
-        if request.method == "GET":
+        if request.method == METHOD_GET:
             serializer.save()
             return Response(
                 {"status": "Рецепт добавлен в избранное"},
                 status=status.HTTP_201_CREATED,
             )
-        if request.method == "DELETE":
+        if request.method == METHOD_DELETE:
             recipe = self.get_object()
             number_deleted_objects, _ = FavoriteRecipe.objects.filter(
                 user=request.user,
