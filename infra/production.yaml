@@ -31,7 +31,7 @@ services:
     volumes:
       - static_value:/code/backend_static/
       - media_value:/code/backend_media/
-    command: bash -c
+    command: >
             "python3 manage.py migrate &&
              python3 manage.py collectstatic &&
              python3 manage.py createadmin &&
