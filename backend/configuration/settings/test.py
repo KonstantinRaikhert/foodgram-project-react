@@ -1,6 +1,3 @@
-"""
-With these settings, tests run faster.
-"""
 import environ
 
 from .base import *  # noqa
@@ -22,18 +19,9 @@ TEST_RUNNER = "django.test.runner.DiscoverRunner"
 # https://docs.djangoproject.com/en/dev/ref/settings/#password-hashers
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
-
-# # EMAIL
-# # ---------------------------------------------------------------------------
-# # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-# EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",  # Noqa
     }
 }
-
-# Your stuff...
-# ------------------------------------------------------------------------------
