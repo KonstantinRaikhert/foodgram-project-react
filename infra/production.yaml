@@ -31,11 +31,11 @@ services:
     volumes:
       - static_value:/code/backend_static/
       - media_value:/code/backend_media/
-    command: bash -c
-            "python3 manage.py migrate &&
-             python3 manage.py collectstatic &&
-             python3 manage.py createadmin &&
-             python3 manage.py filldb"
+    command: >
+      sh -c "python manage.py migrate &&
+            #  python manage.py collectstatic | yes &&
+             python manage.py createadmin &&
+             python manage.py filldb"
     depends_on:
       - backend
     env_file:
