@@ -78,11 +78,12 @@ jobs:
           script: |
             cd ${{ github.event.repository.name }}
             git pull
-            cd ./infra/production/
+            cd ./infra/
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramback
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramfront
             sudo docker-compose -f production.yaml stop
             sudo docker-compose -f production.yaml rm backend
+            mkdir -p ./.envs/
             touch .envs/.postgres
             echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .postgres
             echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .postgres
