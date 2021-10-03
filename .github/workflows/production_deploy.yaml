@@ -74,8 +74,11 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          stack_file_name: production.yaml
+          # stack_file_name: production.yaml
           script: |
+            cd ${{ github.event.repository.name }}
+            git pull
+            cd ./infra/production/
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramback
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramfront
             sudo docker-compose -f production.yaml stop
