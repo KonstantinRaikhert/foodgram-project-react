@@ -913,7 +913,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 name = "pytest-django"
 version = "4.4.0"
 description = "A Django plugin for pytest."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -1219,7 +1219,7 @@ six = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "fbd7f58851acc2a2c6e14f05d9d7bead4deaceb8883c0b31e7850ec49ea6d60d"
+content-hash = "8c8647e1b35082b0811d69a1258e516fc9bb74a85d90c26c7917b2df29f061c7"
 
 [metadata.files]
 appnope = [
