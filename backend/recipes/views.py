@@ -77,47 +77,6 @@ class RecipeViewSet(ModelViewSet):
             return RecipePostSerializer
         return RecipeSerializer
 
-    # @action(
-    #     detail=False,
-    #     methods=[
-    #         "get",
-    #     ],
-    #     url_path="<pk>/favorite",
-    #     url_name="get-favorite",
-    #     permission_classes=[permissions.IsAuthenticated],
-    # )
-    # def get_favorite(self, request, pk):
-    #     serializer = FavoriteRecipeSerializer(
-    #         data={"recipe": pk, "user": request.user.id}
-    #     )
-    #     serializer.is_valid(raise_exception=True)
-    #     # if request.method == METHOD_GET:
-    #     serializer.save()
-    #     return Response(
-    #         {"status": "Рецепт добавлен в избранное"},
-    #         status=status.HTTP_201_CREATED,
-    #     )
-
-    # @action(
-    #     detail=True,
-    #     methods=METHOD_DELETE,
-    #     url_path="favorite",
-    #     # url_name="favorite",
-    #     permission_classes=[permissions.IsAuthenticated],
-    # )
-    # def delete_favorite(self, request, pk):
-    #     recipe = self.get_object()
-    #     number_deleted_objects, _ = FavoriteRecipe.objects.filter(
-    #         user=request.user,
-    #         recipe=recipe,
-    #     ).delete()
-    #     if number_deleted_objects == 0:
-    #         raise FAVORITE_RECIPE_ERROR
-    #     return Response(
-    #         {"status": "Рецепт удалён из избранного"},
-    #         status=status.HTTP_204_NO_CONTENT,
-    #     )
-
     @action(
         detail=True,
         methods=(METHOD_GET, METHOD_DELETE),
