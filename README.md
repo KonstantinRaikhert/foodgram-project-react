@@ -1,4 +1,5 @@
 [![codestyle PEP8](https://github.com/raikhert13/foodgram-project-react/actions/workflows/codestyle.yaml/badge.svg)](https://github.com/raikhert13/foodgram-project-react/actions/workflows/codestyle.yaml)
+[![deploy](https://github.com/raikhert13/foodgram-project-react/actions/workflows/production_deploy.yaml/badge.svg)](https://github.com/raikhert13/foodgram-project-react/actions/workflows/production_deploy.yaml)
 # Продуктовый помощник. Дипломный проект курса python-разработчика - Яндекс.Практикум
 Онлайн-сервис, где пользователи могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд
 
