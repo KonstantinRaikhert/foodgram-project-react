@@ -72,8 +72,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           stack_file_name: production.yaml
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramback
