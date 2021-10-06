@@ -2,7 +2,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.filters import RecipeFilter
+from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models import (
     FavoriteRecipe,
     Ingredient,
@@ -52,6 +52,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = IngredientFilter
     pagination_class = None
 
 

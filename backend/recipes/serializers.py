@@ -60,13 +60,9 @@ class IngredientItemSerializer(serializers.ModelSerializer):
 
 class IngredientItemPostSerializer(serializers.Serializer):
     id = serializers.IntegerField(write_only=True)
-    amount = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        amount = data.get("amount")
-        if not amount.isnumeric():
-            raise INGREDIENT_AMOUNT_ERROR
-        return data
+    amount = serializers.IntegerField(
+        max_value=5000, min_value=1, write_only=True
+    )
 
 
 class RecipeSerializer(serializers.ModelSerializer):
