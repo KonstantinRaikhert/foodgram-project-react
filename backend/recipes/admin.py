@@ -5,6 +5,7 @@ from recipes.models import (
     Ingredient,
     IngredientItem,
     Recipe,
+    ShoppingCart,
     Tag,
 )
 from utilites.mixins import AdminColor
@@ -27,6 +28,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class IngredientItemAdmin(admin.ModelAdmin):
     list_display = ("id", "recipe", "ingredient")
+    search_fields = ("recipe__name",)
 
 
 class IngridientItemAdmin(admin.StackedInline):
@@ -36,8 +38,13 @@ class IngridientItemAdmin(admin.StackedInline):
 
 class FavoriteRecipeAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe")
-    search_fields = ("user", "recipe")
-    list_filter = ("user",)
+    search_fields = ("recipe__name", "user__username")
+    ordering = ("user",)
+
+
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = ("user", "recipe")
+    search_fields = ("recipe__name", "user__username")
     ordering = ("user",)
 
 
@@ -52,7 +59,7 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     exclude = ("ingredients",)
     search_fields = ("name", "author__username")
-    list_filter = ("name", "cooking_time", "author")
+    list_filter = ("tags",)
     filter_horizontal = ("tags",)
 
     readonly_fields = ("image_change_preview",)
@@ -88,3 +95,4 @@ admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(FavoriteRecipe, FavoriteRecipeAdmin)
 admin.site.register(IngredientItem, IngredientItemAdmin)
+admin.site.register(ShoppingCart, ShoppingCartAdmin)

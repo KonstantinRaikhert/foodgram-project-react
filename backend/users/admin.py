@@ -30,7 +30,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ("author", "subscriber")
-    list_filter = ("author",)
+    search_fields = ("author__username",)
     ordering = ("id",)
 
 

@@ -74,7 +74,19 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = "__all__"
+        fields = (
+            "id",
+            "tags",
+            "author",
+            "ingredients",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+            "is_favorited",
+            "is_in_shopping_cart",
+        )
+        read_only_fields = ("author", "is_favorited", "is_in_shopping_cart")
 
     def get_ingredients(self, obj):
         q_set = IngredientItem.objects.filter(recipe=obj)
