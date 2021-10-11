@@ -67,11 +67,19 @@ class RecipeViewSet(ModelViewSet):
         queryset = Recipe.objects.all()
         is_favorited = self.request.query_params.get("is_favorited")
         favorite = FavoriteRecipe.objects.filter(user=self.request.user.id)
+        is_in_shopping_cart = self.request.query_params.get(
+            "is_in_shopping_cart"
+        )
+        shopping_cart = ShoppingCart.objects.filter(user=self.request.user.id)
 
         if is_favorited == "true":
             queryset = queryset.filter(favoriterecipe__in=favorite)
         elif is_favorited == "false":
             queryset = queryset.exclude(favoriterecipe__in=favorite)
+        if is_in_shopping_cart == "true":
+            queryset = queryset.filter(shoppingcart__in=shopping_cart)
+        elif is_in_shopping_cart == "false":
+            queryset = queryset.exclude(shoppingcart__in=shopping_cart)
         return queryset.all().order_by("-id")
 
     def get_serializer_class(self):
