@@ -82,6 +82,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramfront
             sudo docker-compose -f production.yaml stop
             sudo docker-compose -f production.yaml rm -f backend
+            sudo docker-compose -f production.yaml rm -f nginx
             mkdir -p ./.envs/
             touch .envs/.postgres
             echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .postgres
