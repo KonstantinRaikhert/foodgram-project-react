@@ -58,7 +58,7 @@ class RecipeAdmin(admin.ModelAdmin):
         "image_list_preview",
     )
     exclude = ("ingredients",)
-    search_fields = ("name", "author__username")
+    search_fields = ("name", "author__username", "author__email")
     list_filter = ("tags",)
     filter_horizontal = ("tags",)
 
