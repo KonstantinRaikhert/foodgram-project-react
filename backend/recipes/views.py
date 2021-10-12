@@ -23,6 +23,7 @@ from rest_framework import permissions, serializers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from users.permissions import IsAuthorOrReadOnly
 from xhtml2pdf import pisa
 
 FAVORITE_RECIPE_ERROR = serializers.ValidationError(
@@ -60,8 +61,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
-
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = [IsAuthorOrReadOnly]
 
     def get_queryset(self):
         queryset = Recipe.objects.all()
